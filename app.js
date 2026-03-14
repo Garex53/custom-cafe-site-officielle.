@@ -451,9 +451,33 @@ function renderSales() {
 function renderStockTable() {
   const products = getStockFilteredProducts();
   if (!products.length) {
-    el.stockTableBody.innerHTML = `<tr><td colspan="6"><div class="empty-state-inline">Aucun produit.</div></td></tr>`;
+    el.stockTableBody.innerHTML = `<tr><td colspan="6">Aucun produit</td></tr>`;
     return;
   }
+
+  el.stockTableBody.innerHTML = products.map((product) => {
+    return `
+      <tr>
+        <td>${product.name}</td>
+        <td>${product.category}</td>
+        <td>${product.price} €</td>
+        <td>${product.stock}</td>
+        <td>
+          <input
+            type="number"
+            min="0"
+            value="${product.stock}"
+            data-stock-input="${product.id}"
+          />
+
+          <button data-stock-save="${product.id}">
+            Enregistrer
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
 
   el.stockTableBody.innerHTML = products.map((product) => {
     const low = Number(product.stock) <= Number(product.minStock || 0);
