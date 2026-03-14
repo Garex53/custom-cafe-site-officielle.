@@ -238,3 +238,13 @@ code { display: block; margin-top: 8px; background: rgba(255,255,255,0.04); bord
   .search-input { min-width: 0; width: 100%; }
   .identity-box { grid-template-columns: 1fr; }
 }
+.stock-input {
+  width: 90px;
+  min-width: 90px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(10,18,40,0.9);
+  color: #fff;
+  outline: none;
+}
