@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#0b1624"/>
+  <circle cx="620" cy="110" r="120" fill="#54b7ff" opacity=".15"/>
+  <rect x="300" y="120" width="185" height="260" rx="28" fill="#8a593d"/>
+  <rect x="315" y="135" width="155" height="225" rx="22" fill="#4d2f1f"/>
+  <rect x="325" y="145" width="135" height="58" rx="18" fill="#d9eef9" opacity=".95"/>
+  <path d="M387 60l26 0 15 90h-56z" fill="#ffb15c"/>
+  <path d="M330 160l25 25M390 150l28 28M430 155l25 25" stroke="#ffffff" stroke-opacity=".8" stroke-width="10" stroke-linecap="round"/>
+  <text x="52" y="78" fill="#8dd8ff" font-family="Inter,Arial" font-weight="800" font-size="38">ICED COFFEE</text>
+</svg>

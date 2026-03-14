@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#0f1524"/>
+  <circle cx="160" cy="90" r="110" fill="#ff8b38" opacity=".12"/>
+  <rect x="300" y="115" width="180" height="250" rx="36" fill="#c89063"/>
+  <rect x="315" y="135" width="150" height="210" rx="28" fill="#eed6bf"/>
+  <path d="M478 170h42c32 0 58 26 58 58s-26 58-58 58h-42" fill="none" stroke="#c89063" stroke-width="24"/>
+  <path d="M338 160c20-28 84-28 104 0" fill="none" stroke="#fff4e4" stroke-width="10" stroke-linecap="round"/>
+  <path d="M348 185c18 18 66 18 84 0" fill="none" stroke="#e6b488" stroke-width="8" stroke-linecap="round"/>
+  <text x="52" y="78" fill="#ffb15c" font-family="Inter,Arial" font-weight="800" font-size="38">LATTE VANILLE</text>
+</svg>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BadSide • Custom Café</title>
+  <meta name="description" content="Back-office et caisse temps réel du Custom Café BadSide." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-card">
+        <div class="brand-logo-wrap">
+          <img src="images/logo-badside-cafe.svg" alt="Logo BadSide Custom Café" class="brand-logo" />
+        </div>
+        <div>
+          <div class="brand-eyebrow">BadSide Network</div>
+          <h1>Custom Café</h1>
+          <p>Back-office caisse & stock</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-panel="dashboard-panel">Dashboard</button>
+        <button class="nav-btn" data-panel="catalog-panel">Catalogue</button>
+        <button class="nav-btn" data-panel="cashier-panel">Caisse</button>
+        <button class="nav-btn" data-panel="sales-panel">Ventes</button>
+        <button class="nav-btn" data-panel="stock-panel">Stock</button>
+        <button class="nav-btn" data-panel="settings-panel">Configuration</button>
+      </nav>
+
+      <section class="side-highlight">
+        <h3>Firebase temps réel</h3>
+        <p>Tous les PC voient les mêmes produits, ventes, stocks et tickets.</p>
+      </section>
+
+      <section class="side-card compact">
+        <div class="side-card-title">État connexion</div>
+        <div id="firebase-status" class="status-pill warning">Configuration Firebase…</div>
+      </section>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <div class="topbar-eyebrow">BadSide • Interface officielle</div>
+          <h2 id="panel-title">Dashboard général</h2>
+        </div>
+        <div class="topbar-actions">
+          <div class="badge-soft">Style BadSide</div>
+          <button id="quick-sync-btn" class="btn ghost">Actualiser</button>
+        </div>
+      </header>
+
+      <section id="firebase-warning" class="config-warning hidden">
+        <strong>Firebase non configuré.</strong>
+        <span>Remplis <code>firebase-config.js</code> pour activer la synchro temps réel.</span>
+      </section>
+
+      <section id="dashboard-panel" class="panel active">
+        <div class="stats-grid">
+          <article class="stat-card">
+            <span>Chiffre d'affaires</span>
+            <strong id="stat-revenue">0,00 €</strong>
+          </article>
+          <article class="stat-card">
+            <span>Nombre de ventes</span>
+            <strong id="stat-sales-count">0</strong>
+          </article>
+          <article class="stat-card">
+            <span>Panier moyen</span>
+            <strong id="stat-average">0,00 €</strong>
+          </article>
+          <article class="stat-card">
+            <span>Produits</span>
+            <strong id="stat-products-count">0</strong>
+          </article>
+          <article class="stat-card">
+            <span>Stock bas</span>
+            <strong id="stat-low-stock">0</strong>
+          </article>
+        </div>
+
+        <div class="two-col-grid">
+          <article class="card-panel">
+            <div class="section-head">
+              <h3>Stocks bas</h3>
+            </div>
+            <div id="low-stock-list" class="stack-list empty-state-inline">Aucun stock bas.</div>
+          </article>
+
+          <article class="card-panel">
+            <div class="section-head">
+              <h3>Dernières ventes</h3>
+            </div>
+            <div id="latest-sales-list" class="stack-list empty-state-inline">Aucune vente.</div>
+          </article>
+        </div>
+      </section>
+
+      <section id="catalog-panel" class="panel">
+        <div class="section-head split-head">
+          <div>
+            <h3>Catalogue produits</h3>
+            <p>Visuel, prix, badge, stock et catégorie.</p>
+          </div>
+          <div class="toolbar">
+            <input id="catalog-search" class="input search-input" type="search" placeholder="Rechercher un produit…" />
+            <select id="catalog-category-filter" class="input select">
+              <option value="all">Toutes les catégories</option>
+            </select>
+          </div>
+        </div>
+        <div id="catalog-grid" class="catalog-grid"></div>
+      </section>
+
+      <section id="cashier-panel" class="panel">
+        <div class="three-col-grid">
+          <article class="card-panel form-card span-2">
+            <div class="section-head">
+              <h3>Nouvelle vente</h3>
+              <button id="add-line-btn" class="btn secondary" type="button">Ajouter une ligne</button>
+            </div>
+
+            <form id="sale-form" class="grid-form">
+              <div class="form-row two">
+                <label>
+                  <span>Employé</span>
+                  <input id="sale-employee-name" class="input" type="text" placeholder="Ex: Mateo" required />
+                </label>
+                <label>
+                  <span>Note ticket</span>
+                  <input id="sale-note" class="input" type="text" placeholder="Ex: table terrasse / commande 12" />
+                </label>
+              </div>
+
+              <div id="sale-lines" class="sale-lines"></div>
+
+              <div class="form-actions">
+                <button class="btn primary" type="submit">Valider la vente</button>
+                <button id="clear-ticket-btn" class="btn ghost" type="button">Vider le ticket</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card-panel receipt-card">
+            <div class="section-head">
+              <h3>Aperçu ticket</h3>
+            </div>
+            <div id="receipt-preview" class="receipt-preview"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="sales-panel" class="panel">
+        <div class="section-head split-head">
+          <div>
+            <h3>Historique des ventes</h3>
+            <p>Toutes les ventes enregistrées en temps réel.</p>
+          </div>
+        </div>
+        <div id="sales-list" class="sales-list"></div>
+      </section>
+
+      <section id="stock-panel" class="panel">
+        <div class="three-col-grid">
+          <article class="card-panel form-card span-1">
+            <div class="section-head">
+              <h3>Ajouter un produit</h3>
+            </div>
+
+            <form id="product-form" class="grid-form">
+              <label>
+                <span>Nom</span>
+                <input id="product-name" class="input" type="text" placeholder="Ex: Latte Vanille" required />
+              </label>
+              <div class="form-row two">
+                <label>
+                  <span>Prix (€)</span>
+                  <input id="product-price" class="input" type="number" min="0" step="0.01" placeholder="0.00" required />
+                </label>
+                <label>
+                  <span>Stock</span>
+                  <input id="product-stock" class="input" type="number" min="0" step="1" placeholder="0" required />
+                </label>
+              </div>
+              <div class="form-row two">
+                <label>
+                  <span>Stock minimum</span>
+                  <input id="product-min-stock" class="input" type="number" min="0" step="1" value="10" />
+                </label>
+                <label>
+                  <span>Catégorie</span>
+                  <select id="product-category" class="input select">
+                    <option value="Boisson chaude">Boisson chaude</option>
+                    <option value="Boisson froide">Boisson froide</option>
+                    <option value="Snack">Snack</option>
+                    <option value="Dessert">Dessert</option>
+                    <option value="Signature">Signature</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                <span>Badge</span>
+                <input id="product-badge" class="input" type="text" placeholder="Ex: Best-seller" />
+              </label>
+              <label>
+                <span>Image</span>
+                <select id="product-image" class="input select">
+                  <option value="images/cafe-espresso.svg">Espresso</option>
+                  <option value="images/cafe-latte.svg">Latte</option>
+                  <option value="images/cafe-iced.svg">Café glacé</option>
+                  <option value="images/cafe-dessert.svg">Dessert</option>
+                  <option value="images/cafe-snack.svg">Snack</option>
+                  <option value="images/cafe-signature.svg">Signature</option>
+                </select>
+              </label>
+              <button class="btn primary" type="submit">Ajouter le produit</button>
+            </form>
+          </article>
+
+          <article class="card-panel span-2">
+            <div class="section-head split-head">
+              <div>
+                <h3>Gestion du stock</h3>
+                <p>Modifier, réapprovisionner ou supprimer un produit.</p>
+              </div>
+              <input id="stock-search" class="input search-input" type="search" placeholder="Rechercher dans le stock…" />
+            </div>
+            <div class="table-wrap">
+              <table class="stock-table">
+                <thead>
+                  <tr>
+                    <th>Produit</th>
+                    <th>Catégorie</th>
+                    <th>Prix</th>
+                    <th>Stock</th>
+                    <th>Min</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="stock-table-body"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="settings-panel" class="panel">
+        <div class="three-col-grid">
+          <article class="card-panel span-2">
+            <div class="section-head">
+              <h3>Identité BadSide</h3>
+            </div>
+            <div class="identity-box">
+              <img src="images/logo-badside-cafe.svg" alt="Logo BadSide" class="identity-logo" />
+              <div>
+                <h4>Custom Café • BadSide</h4>
+                <p>Palette noire, orange et premium pour rester dans la même direction visuelle que vos autres sites.</p>
+                <ul class="clean-list">
+                  <li>Catalogue avec images</li>
+                  <li>Caisse multi-lignes</li>
+                  <li>Historique ventes temps réel</li>
+                  <li>Gestion stock complète</li>
+                </ul>
+              </div>
+            </div>
+          </article>
+
+          <article class="card-panel">
+            <div class="section-head">
+              <h3>Configuration Firebase</h3>
+            </div>
+            <div class="config-box">
+              <p>Le site lit les collections :</p>
+              <code>customCafeGithubProducts</code>
+              <code>customCafeGithubSales</code>
+              <p class="muted">Le fichier à remplir est <strong>firebase-config.js</strong>.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="sale-line-template">
+    <div class="sale-line-row">
+      <select class="input select line-product"></select>
+      <input class="input line-qty" type="number" min="1" step="1" value="1" />
+      <input class="input line-price" type="number" min="0" step="0.01" value="0" />
+      <div class="line-stock">Stock : 0</div>
+      <div class="line-total">0,00 €</div>
+      <button class="btn danger remove-line" type="button">Suppr.</button>
+    </div>
+  </template>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

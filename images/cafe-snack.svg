@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#11131a"/>
+  <circle cx="650" cy="85" r="120" fill="#ffcf67" opacity=".12"/>
+  <circle cx="380" cy="250" r="118" fill="#c98344"/>
+  <circle cx="380" cy="250" r="100" fill="#e0b07b"/>
+  <circle cx="328" cy="215" r="16" fill="#4b2c1f"/>
+  <circle cx="430" cy="200" r="17" fill="#4b2c1f"/>
+  <circle cx="462" cy="270" r="15" fill="#4b2c1f"/>
+  <circle cx="356" cy="292" r="14" fill="#4b2c1f"/>
+  <circle cx="404" cy="308" r="16" fill="#4b2c1f"/>
+  <text x="52" y="78" fill="#ffcf67" font-family="Inter,Arial" font-weight="800" font-size="38">COOKIE CARAMEL</text>
+</svg>

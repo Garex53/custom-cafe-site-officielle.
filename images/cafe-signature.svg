@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#ff8b38"/><stop offset="1" stop-color="#ffcf67"/></linearGradient></defs>
+  <rect width="800" height="500" fill="#0d0f18"/>
+  <circle cx="150" cy="95" r="110" fill="#ff8b38" opacity=".14"/>
+  <path d="M280 350h250l-25-175H305z" fill="#7a4730"/>
+  <path d="M325 175h160l18 135H307z" fill="#2c180f"/>
+  <path d="M388 62l22 0 14 114h-50z" fill="url(#g)"/>
+  <path d="M340 215c22-25 78-25 100 0" fill="none" stroke="#ffcf67" stroke-width="10" stroke-linecap="round"/>
+  <path d="M328 250c27 20 95 20 122 0" fill="none" stroke="#ff8b38" stroke-width="9" stroke-linecap="round"/>
+  <text x="52" y="78" fill="#ffb15c" font-family="Inter,Arial" font-weight="800" font-size="38">BADSIDE SIGNATURE</text>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs><linearGradient id="bg" x1="0" x2="1"><stop offset="0" stop-color="#1a2235"/><stop offset="1" stop-color="#0c1220"/></linearGradient></defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <circle cx="650" cy="90" r="120" fill="#ff8b38" opacity=".15"/>
+  <rect x="270" y="175" width="250" height="140" rx="28" fill="#2c180f"/>
+  <rect x="295" y="190" width="200" height="95" rx="22" fill="#6a3f28"/>
+  <path d="M520 205h35c30 0 55 25 55 55s-25 55-55 55h-35" fill="none" stroke="#6a3f28" stroke-width="22"/>
+  <ellipse cx="395" cy="190" rx="95" ry="18" fill="#d6a37a"/>
+  <text x="52" y="78" fill="#ffb15c" font-family="Inter,Arial" font-weight="800" font-size="38">ESPRESSO</text>
+</svg>

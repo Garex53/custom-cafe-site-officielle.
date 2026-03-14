@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#130f1f"/>
+  <circle cx="180" cy="80" r="120" fill="#ff8b38" opacity=".12"/>
+  <path d="M270 330h270l-55-140H325z" fill="#8a5331"/>
+  <path d="M320 190h165c30 0 55 25 55 55 0 18-9 34-24 44l-10 41H300l-11-44c-12-11-19-26-19-41 0-30 22-55 50-55z" fill="#d49a6c"/>
+  <circle cx="370" cy="225" r="18" fill="#4b2819"/>
+  <circle cx="432" cy="248" r="16" fill="#4b2819"/>
+  <circle cx="398" cy="274" r="17" fill="#4b2819"/>
+  <text x="52" y="78" fill="#ffb15c" font-family="Inter,Arial" font-weight="800" font-size="38">MUFFIN CHOCO</text>
+</svg>
