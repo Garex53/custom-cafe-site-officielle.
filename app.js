@@ -139,9 +139,14 @@ function showToast(message, type = "info") {
   if (!el.toast) return;
   el.toast.textContent = message;
   el.toast.className = "toast show";
-  if (type === "error") el.toast.style.borderColor = "rgba(255,107,107,0.5)";
-  else if (type === "success") el.toast.style.borderColor = "rgba(63,213,138,0.5)";
-  else el.toast.style.borderColor = "rgba(255,255,255,0.08)";
+
+  if (type === "error") {
+    el.toast.style.borderColor = "rgba(255,107,107,0.5)";
+  } else if (type === "success") {
+    el.toast.style.borderColor = "rgba(63,213,138,0.5)";
+  } else {
+    el.toast.style.borderColor = "rgba(255,255,255,0.08)";
+  }
 
   clearTimeout(showToast._timer);
   showToast._timer = setTimeout(() => {
@@ -160,7 +165,9 @@ function escapeHtml(value = "") {
 }
 
 function uid() {
-  return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
 function emptyLine() {
@@ -186,21 +193,45 @@ function sortByNewest(list) {
   return [...list].sort((a, b) => getSafeTimestamp(b.createdAt) - getSafeTimestamp(a.createdAt));
 }
 
+function formatDate(value) {
+  const time = getSafeTimestamp(value);
+  if (!time) return "Date inconnue";
+  return new Intl.DateTimeFormat("fr-BE", {
+    dateStyle: "short",
+    timeStyle: "short"
+  }).format(new Date(time));
+}
+
 function setFirebaseStatus() {
   if (!firebaseReady) {
-    el.firebaseStatus.textContent = "Configurer Firebase";
-    el.firebaseStatus.className = "status-pill warning";
-    el.firebaseWarning.classList.remove("hidden");
-    el.firebaseWarning.querySelector("span").textContent = firebaseConfigError || "Configuration Firebase invalide.";
+    if (el.firebaseStatus) {
+      el.firebaseStatus.textContent = "Configurer Firebase";
+      el.firebaseStatus.className = "status-pill warning";
+    }
+
+    if (el.firebaseWarning) {
+      el.firebaseWarning.classList.remove("hidden");
+      const span = el.firebaseWarning.querySelector("span");
+      if (span) {
+        span.textContent = firebaseConfigError || "Configuration Firebase invalide.";
+      }
+    }
     return;
   }
 
-  el.firebaseStatus.textContent = "Connecté à Firebase";
-  el.firebaseStatus.className = "status-pill ok";
-  el.firebaseWarning.classList.add("hidden");
+  if (el.firebaseStatus) {
+    el.firebaseStatus.textContent = "Connecté à Firebase";
+    el.firebaseStatus.className = "status-pill ok";
+  }
+
+  if (el.firebaseWarning) {
+    el.firebaseWarning.classList.add("hidden");
+  }
 }
 
 function updatePanelTitle(panelId) {
+  if (!el.panelTitle) return;
+
   const titles = {
     "dashboard-panel": "Dashboard général",
     "catalog-panel": "Catalogue produits",
@@ -209,6 +240,7 @@ function updatePanelTitle(panelId) {
     "stock-panel": "Gestion du stock",
     "settings-panel": "Configuration"
   };
+
   el.panelTitle.textContent = titles[panelId] || "Custom Café";
 }
 
@@ -229,14 +261,17 @@ function computeStats() {
   const revenue = state.sales.reduce((sum, sale) => sum + Number(sale.total || 0), 0);
   const salesCount = state.sales.length;
   const average = salesCount ? revenue / salesCount : 0;
-  const lowStock = state.products.filter((product) => Number(product.stock || 0) <= Number(product.minStock || 0));
+  const lowStock = state.products.filter(
+    (product) => Number(product.stock || 0) <= Number(product.minStock || 0)
+  );
   return { revenue, salesCount, average, lowStock };
 }
 
 function getFilteredProducts() {
   const q = state.catalogSearch.trim().toLowerCase();
   return state.products.filter((product) => {
-    const matchesCategory = state.categoryFilter === "all" || product.category === state.categoryFilter;
+    const matchesCategory =
+      state.categoryFilter === "all" || product.category === state.categoryFilter;
     const hay = `${product.name} ${product.badge} ${product.category}`.toLowerCase();
     const matchesSearch = !q || hay.includes(q);
     return matchesCategory && matchesSearch;
@@ -253,55 +288,70 @@ function getStockFilteredProducts() {
 }
 
 function renderCategoryFilter() {
-  const categories = ["all", ...new Set(state.products.map((product) => product.category).filter(Boolean))];
+  if (!el.catalogCategoryFilter) return;
+
+  const categories = [
+    "all",
+    ...new Set(state.products.map((product) => product.category).filter(Boolean))
+  ];
+
   const current = state.categoryFilter;
+
   el.catalogCategoryFilter.innerHTML = categories.map((category) => {
     const label = category === "all" ? "Toutes les catégories" : category;
     return `<option value="${escapeHtml(category)}">${escapeHtml(label)}</option>`;
   }).join("");
+
   el.catalogCategoryFilter.value = categories.includes(current) ? current : "all";
 }
 
 function renderDashboard() {
   const stats = computeStats();
-  el.statRevenue.textContent = euro(stats.revenue);
-  el.statSalesCount.textContent = String(stats.salesCount);
-  el.statAverage.textContent = euro(stats.average);
-  el.statProductsCount.textContent = String(state.products.length);
-  el.statLowStock.textContent = String(stats.lowStock.length);
 
-  if (!stats.lowStock.length) {
-    el.lowStockList.innerHTML = `<div class="empty-state-inline">Aucun stock bas.</div>`;
-  } else {
-    el.lowStockList.innerHTML = stats.lowStock.slice(0, 6).map((product) => `
-      <div class="sale-card">
-        <div class="sale-item-head">
-          <strong>${escapeHtml(product.name)}</strong>
-          <span class="qty-bubble low">${product.stock}</span>
+  if (el.statRevenue) el.statRevenue.textContent = euro(stats.revenue);
+  if (el.statSalesCount) el.statSalesCount.textContent = String(stats.salesCount);
+  if (el.statAverage) el.statAverage.textContent = euro(stats.average);
+  if (el.statProductsCount) el.statProductsCount.textContent = String(state.products.length);
+  if (el.statLowStock) el.statLowStock.textContent = String(stats.lowStock.length);
+
+  if (el.lowStockList) {
+    if (!stats.lowStock.length) {
+      el.lowStockList.innerHTML = `<div class="empty-state-inline">Aucun stock bas.</div>`;
+    } else {
+      el.lowStockList.innerHTML = stats.lowStock.slice(0, 6).map((product) => `
+        <div class="sale-card">
+          <div class="sale-item-head">
+            <strong>${escapeHtml(product.name)}</strong>
+            <span class="qty-bubble low">${product.stock}</span>
+          </div>
+          <div class="sale-meta">Min conseillé : ${product.minStock} • ${escapeHtml(product.category)}</div>
         </div>
-        <div class="sale-meta">Min conseillé : ${product.minStock} • ${escapeHtml(product.category)}</div>
-      </div>
-    `).join("");
+      `).join("");
+    }
   }
 
-  const latestSales = sortByNewest(state.sales).slice(0, 5);
-  if (!latestSales.length) {
-    el.latestSalesList.innerHTML = `<div class="empty-state-inline">Aucune vente.</div>`;
-  } else {
-    el.latestSalesList.innerHTML = latestSales.map((sale) => `
-      <div class="sale-card">
-        <div class="sale-item-head">
-          <strong>${escapeHtml(sale.employeeName || "Employé")}</strong>
-          <span>${euro(sale.total)}</span>
+  if (el.latestSalesList) {
+    const latestSales = sortByNewest(state.sales).slice(0, 5);
+    if (!latestSales.length) {
+      el.latestSalesList.innerHTML = `<div class="empty-state-inline">Aucune vente.</div>`;
+    } else {
+      el.latestSalesList.innerHTML = latestSales.map((sale) => `
+        <div class="sale-card">
+          <div class="sale-item-head">
+            <strong>${escapeHtml(sale.employeeName || "Employé")}</strong>
+            <span>${euro(sale.total)}</span>
+          </div>
+          <div class="sale-meta">${formatDate(sale.createdAt)}${sale.note ? ` • ${escapeHtml(sale.note)}` : ""}</div>
         </div>
-        <div class="sale-meta">${formatDate(sale.createdAt)}${sale.note ? ` • ${escapeHtml(sale.note)}` : ""}</div>
-      </div>
-    `).join("");
+      `).join("");
+    }
   }
 }
 
 function renderCatalog() {
   renderCategoryFilter();
+  if (!el.catalogGrid) return;
+
   const products = getFilteredProducts();
 
   if (!products.length) {
@@ -314,7 +364,7 @@ function renderCatalog() {
     return `
       <article class="product-card">
         <div class="product-image-wrap">
-          <img class="product-image" src="${escapeHtml(product.image || 'images/cafe-signature.svg')}" alt="${escapeHtml(product.name)}" />
+          <img class="product-image" src="${escapeHtml(product.image || "images/cafe-signature.svg")}" alt="${escapeHtml(product.name)}" />
         </div>
         <div class="product-body">
           <div class="product-top">
@@ -326,7 +376,7 @@ function renderCatalog() {
           </div>
           <div class="product-footer">
             <div class="product-price">${euro(product.price)}</div>
-            <div class="stock-chip ${low ? 'low' : 'good'}">Stock : ${product.stock}</div>
+            <div class="stock-chip ${low ? "low" : "good"}">Stock : ${product.stock}</div>
           </div>
         </div>
       </article>
@@ -335,7 +385,9 @@ function renderCatalog() {
 }
 
 function renderSaleLines() {
+  if (!el.saleLines || !el.saleLineTemplate) return;
   if (!state.currentSaleLines.length) state.currentSaleLines = [emptyLine()];
+
   el.saleLines.innerHTML = "";
 
   state.currentSaleLines.forEach((line) => {
@@ -347,64 +399,80 @@ function renderSaleLines() {
     const totalEl = row.querySelector(".line-total");
     const removeBtn = row.querySelector(".remove-line");
 
-    productSelect.innerHTML = `<option value="">Choisir un produit</option>${state.products.map((product) => `
-      <option value="${product.id}">${escapeHtml(product.name)} • ${euro(product.price)} • stock ${product.stock}</option>
-    `).join("")}`;
-    productSelect.value = line.productId || "";
-    qtyInput.value = line.quantity;
-    priceInput.value = Number(line.unitPrice || 0).toFixed(2);
-    stockEl.textContent = `Stock : ${line.stock || 0}`;
-    totalEl.textContent = euro(line.lineTotal || 0);
+    if (productSelect) {
+      productSelect.innerHTML =
+        `<option value="">Choisir un produit</option>` +
+        state.products.map((product) => `
+          <option value="${product.id}">${escapeHtml(product.name)} • ${euro(product.price)} • stock ${product.stock}</option>
+        `).join("");
 
-    productSelect.addEventListener("change", (event) => {
-      const product = state.products.find((item) => item.id === event.target.value);
-      if (!product) {
-        Object.assign(line, emptyLine(), { localId: line.localId });
-      } else {
-        line.productId = product.id;
-        line.productName = product.name;
-        line.quantity = 1;
-        line.unitPrice = Number(product.price || 0);
-        line.stock = Number(product.stock || 0);
-        line.lineTotal = line.unitPrice;
-      }
-      renderSaleLines();
-      renderReceiptPreview();
-    });
+      productSelect.value = line.productId || "";
 
-    qtyInput.addEventListener("input", (event) => {
-      line.quantity = Math.max(1, Number(event.target.value || 1));
-      line.lineTotal = line.quantity * Number(line.unitPrice || 0);
-      renderSaleLines();
-      renderReceiptPreview();
-    });
+      productSelect.addEventListener("change", (event) => {
+        const product = state.products.find((item) => item.id === event.target.value);
+        if (!product) {
+          Object.assign(line, emptyLine(), { localId: line.localId });
+        } else {
+          line.productId = product.id;
+          line.productName = product.name;
+          line.quantity = 1;
+          line.unitPrice = Number(product.price || 0);
+          line.stock = Number(product.stock || 0);
+          line.lineTotal = line.unitPrice;
+        }
+        renderSaleLines();
+        renderReceiptPreview();
+      });
+    }
 
-    priceInput.addEventListener("input", (event) => {
-      line.unitPrice = Math.max(0, Number(event.target.value || 0));
-      line.lineTotal = line.quantity * line.unitPrice;
-      renderSaleLines();
-      renderReceiptPreview();
-    });
+    if (qtyInput) {
+      qtyInput.value = line.quantity;
+      qtyInput.addEventListener("input", (event) => {
+        line.quantity = Math.max(1, Number(event.target.value || 1));
+        line.lineTotal = line.quantity * Number(line.unitPrice || 0);
+        renderSaleLines();
+        renderReceiptPreview();
+      });
+    }
 
-    removeBtn.addEventListener("click", () => {
-      state.currentSaleLines = state.currentSaleLines.filter((item) => item.localId !== line.localId);
-      if (!state.currentSaleLines.length) state.currentSaleLines = [emptyLine()];
-      renderSaleLines();
-      renderReceiptPreview();
-    });
+    if (priceInput) {
+      priceInput.value = Number(line.unitPrice || 0).toFixed(2);
+      priceInput.addEventListener("input", (event) => {
+        line.unitPrice = Math.max(0, Number(event.target.value || 0));
+        line.lineTotal = line.quantity * line.unitPrice;
+        renderSaleLines();
+        renderReceiptPreview();
+      });
+    }
+
+    if (stockEl) stockEl.textContent = `Stock : ${line.stock || 0}`;
+    if (totalEl) totalEl.textContent = euro(line.lineTotal || 0);
+
+    if (removeBtn) {
+      removeBtn.addEventListener("click", () => {
+        state.currentSaleLines = state.currentSaleLines.filter((item) => item.localId !== line.localId);
+        if (!state.currentSaleLines.length) state.currentSaleLines = [emptyLine()];
+        renderSaleLines();
+        renderReceiptPreview();
+      });
+    }
 
     el.saleLines.appendChild(row);
   });
 }
 
 function renderReceiptPreview() {
+  if (!el.receiptPreview) return;
+
   const validLines = state.currentSaleLines.filter((line) => line.productId);
+
   if (!validLines.length) {
     el.receiptPreview.innerHTML = `<div class="empty-state-inline">Aucune ligne dans le ticket.</div>`;
     return;
   }
 
   const total = validLines.reduce((sum, line) => sum + Number(line.lineTotal || 0), 0);
+
   el.receiptPreview.innerHTML = `
     <div class="receipt-lines">
       ${validLines.map((line) => `
@@ -423,7 +491,10 @@ function renderReceiptPreview() {
 }
 
 function renderSales() {
+  if (!el.salesList) return;
+
   const sales = sortByNewest(state.sales);
+
   if (!sales.length) {
     el.salesList.innerHTML = `<div class="empty-state">Aucune vente enregistrée.</div>`;
     return;
@@ -449,54 +520,44 @@ function renderSales() {
 }
 
 function renderStockTable() {
+  if (!el.stockTableBody) return;
+
   const products = getStockFilteredProducts();
+
   if (!products.length) {
-    el.stockTableBody.innerHTML = `<tr><td colspan="6">Aucun produit</td></tr>`;
+    el.stockTableBody.innerHTML = `<tr><td colspan="6"><div class="empty-state-inline">Aucun produit.</div></td></tr>`;
     return;
   }
 
   el.stockTableBody.innerHTML = products.map((product) => {
-    return `
-      <tr>
-        <td>${product.name}</td>
-        <td>${product.category}</td>
-        <td>${product.price} €</td>
-        <td>${product.stock}</td>
-        <td>
-          <input
-            type="number"
-            min="0"
-            value="${product.stock}"
-            data-stock-input="${product.id}"
-          />
-
-          <button data-stock-save="${product.id}">
-            Enregistrer
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join("");
-}
-
-  el.stockTableBody.innerHTML = products.map((product) => {
     const low = Number(product.stock) <= Number(product.minStock || 0);
+
     return `
       <tr>
         <td>
           <strong>${escapeHtml(product.name)}</strong><br>
-          <span class="muted">${product.badge ? escapeHtml(product.badge) : 'Sans badge'}</span>
+          <span class="muted">${product.badge ? escapeHtml(product.badge) : "Sans badge"}</span>
         </td>
         <td>${escapeHtml(product.category)}</td>
         <td>${euro(product.price)}</td>
-        <td><span class="qty-bubble ${low ? 'low' : 'good'}">${product.stock}</span></td>
+        <td><span class="qty-bubble ${low ? "low" : "good"}">${product.stock}</span></td>
         <td>${product.minStock}</td>
         <td>
           <div class="inline-actions">
-            <button class="btn secondary" type="button" data-stock-adjust="${product.id}" data-stock-delta="1">+1</button>
-            <button class="btn secondary" type="button" data-stock-adjust="${product.id}" data-stock-delta="5">+5</button>
-            <button class="btn ghost" type="button" data-stock-adjust="${product.id}" data-stock-delta="-1">-1</button>
-            <button class="btn danger" type="button" data-delete-product="${product.id}">Supprimer</button>
+            <input
+              class="stock-input"
+              type="number"
+              min="0"
+              step="1"
+              value="${Number(product.stock || 0)}"
+              data-stock-input="${product.id}"
+            />
+            <button class="btn secondary" type="button" data-stock-save="${product.id}">
+              Enregistrer
+            </button>
+            <button class="btn danger" type="button" data-delete-product="${product.id}">
+              Supprimer
+            </button>
           </div>
         </td>
       </tr>
@@ -513,18 +574,10 @@ function renderAll() {
   renderStockTable();
 }
 
-function formatDate(value) {
-  const time = getSafeTimestamp(value);
-  if (!time) return "Date inconnue";
-  return new Intl.DateTimeFormat("fr-BE", {
-    dateStyle: "short",
-    timeStyle: "short"
-  }).format(new Date(time));
-}
-
 async function seedProductsIfEmpty() {
   const snapshot = await getDocs(collection(db, COLLECTIONS.products));
   if (!snapshot.empty) return;
+
   for (const product of DEFAULT_PRODUCTS) {
     await addDoc(collection(db, COLLECTIONS.products), {
       ...product,
@@ -534,28 +587,37 @@ async function seedProductsIfEmpty() {
 }
 
 function subscribeProducts() {
-  const q = query(collection(db, COLLECTIONS.products), orderBy("createdAt", "desc"));
-  onSnapshot(q, (snapshot) => {
+  const qRef = query(collection(db, COLLECTIONS.products), orderBy("createdAt", "desc"));
+
+  onSnapshot(qRef, (snapshot) => {
     state.products = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+
     state.currentSaleLines = state.currentSaleLines.map((line) => {
       if (!line.productId) return line;
+
       const fresh = state.products.find((product) => product.id === line.productId);
       if (!fresh) return { ...emptyLine(), localId: line.localId };
+
+      const unitPrice = Number(line.unitPrice || fresh.price || 0);
+      const quantity = Number(line.quantity || 1);
+
       return {
         ...line,
         productName: fresh.name,
         stock: Number(fresh.stock || 0),
-        unitPrice: Number(line.unitPrice || fresh.price || 0),
-        lineTotal: Number(line.quantity || 1) * Number(line.unitPrice || fresh.price || 0)
+        unitPrice,
+        lineTotal: quantity * unitPrice
       };
     });
+
     renderAll();
   });
 }
 
 function subscribeSales() {
-  const q = query(collection(db, COLLECTIONS.sales), orderBy("createdAt", "desc"));
-  onSnapshot(q, (snapshot) => {
+  const qRef = query(collection(db, COLLECTIONS.sales), orderBy("createdAt", "desc"));
+
+  onSnapshot(qRef, (snapshot) => {
     state.sales = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
     renderAll();
   });
@@ -563,47 +625,71 @@ function subscribeSales() {
 
 async function createProduct(event) {
   event.preventDefault();
-  if (!firebaseReady) return showToast("Firebase non configuré.", "error");
+  if (!firebaseReady) {
+    showToast("Firebase non configuré.", "error");
+    return;
+  }
 
   const payload = {
-    name: el.productName.value.trim(),
-    price: Number(el.productPrice.value || 0),
-    stock: Number(el.productStock.value || 0),
-    minStock: Number(el.productMinStock.value || 0),
-    category: el.productCategory.value,
-    badge: el.productBadge.value.trim(),
-    image: el.productImage.value,
+    name: el.productName?.value.trim() || "",
+    price: Number(el.productPrice?.value || 0),
+    stock: Number(el.productStock?.value || 0),
+    minStock: Number(el.productMinStock?.value || 0),
+    category: el.productCategory?.value || "Divers",
+    badge: el.productBadge?.value.trim() || "",
+    image: el.productImage?.value || "images/cafe-signature.svg",
     createdAt: serverTimestamp()
   };
 
-  if (!payload.name) return showToast("Nom du produit requis.", "error");
+  if (!payload.name) {
+    showToast("Nom du produit requis.", "error");
+    return;
+  }
+
   await addDoc(collection(db, COLLECTIONS.products), payload);
-  el.productForm.reset();
-  el.productMinStock.value = 10;
+
+  if (el.productForm) el.productForm.reset();
+  if (el.productMinStock) el.productMinStock.value = 10;
+
   showToast("Produit ajouté.", "success");
 }
 
 async function createSale(event) {
   event.preventDefault();
-  if (!firebaseReady) return showToast("Firebase non configuré.", "error");
+  if (!firebaseReady) {
+    showToast("Firebase non configuré.", "error");
+    return;
+  }
 
-  const employeeName = el.saleEmployeeName.value.trim();
-  if (!employeeName) return showToast("Nom employé requis.", "error");
+  const employeeName = el.saleEmployeeName?.value.trim() || "";
+  if (!employeeName) {
+    showToast("Nom employé requis.", "error");
+    return;
+  }
 
   const validLines = state.currentSaleLines.filter((line) => line.productId);
-  if (!validLines.length) return showToast("Ajoute au moins une ligne.", "error");
+  if (!validLines.length) {
+    showToast("Ajoute au moins une ligne.", "error");
+    return;
+  }
 
   const preparedLines = validLines.map((line) => {
     const product = state.products.find((item) => item.id === line.productId);
     if (!product) throw new Error(`Produit introuvable: ${line.productName}`);
+
     const quantity = Math.max(1, Number(line.quantity || 1));
-    if (Number(product.stock || 0) < quantity) throw new Error(`Stock insuffisant pour ${product.name}`);
+    if (Number(product.stock || 0) < quantity) {
+      throw new Error(`Stock insuffisant pour ${product.name}`);
+    }
+
+    const unitPrice = Number(line.unitPrice || 0);
+
     return {
       productId: product.id,
       productName: product.name,
       quantity,
-      unitPrice: Number(line.unitPrice || 0),
-      lineTotal: quantity * Number(line.unitPrice || 0)
+      unitPrice,
+      lineTotal: quantity * unitPrice
     };
   });
 
@@ -611,7 +697,7 @@ async function createSale(event) {
 
   await addDoc(collection(db, COLLECTIONS.sales), {
     employeeName,
-    note: el.saleNote.value.trim(),
+    note: el.saleNote?.value.trim() || "",
     total,
     items: preparedLines,
     createdAt: serverTimestamp()
@@ -624,21 +710,26 @@ async function createSale(event) {
   }
 
   state.currentSaleLines = [emptyLine()];
-  el.saleForm.reset();
+  if (el.saleForm) el.saleForm.reset();
+
   showToast("Vente enregistrée.", "success");
   renderSaleLines();
   renderReceiptPreview();
 }
 
-async function adjustStock(productId, delta) {
+async function setStock(productId, newValue) {
   if (!firebaseReady) return;
+
   const product = state.products.find((item) => item.id === productId);
   if (!product) return;
-  const nextStock = Number(product.stock || 0) + Number(delta || 0);
-  if (nextStock < 0) return showToast("Stock déjà à 0.", "error");
+
+  const stock = Math.max(0, Number(newValue || 0));
+
   await updateDoc(doc(db, COLLECTIONS.products, productId), {
-    stock: increment(Number(delta || 0))
+    stock
   });
+
+  showToast("Stock mis à jour.", "success");
 }
 
 async function deleteProduct(productId) {
@@ -654,41 +745,41 @@ async function deleteSale(saleId) {
 }
 
 function initEvents() {
-  el.catalogSearch.addEventListener("input", (event) => {
+  el.catalogSearch?.addEventListener("input", (event) => {
     state.catalogSearch = event.target.value;
     renderCatalog();
   });
 
-  el.catalogCategoryFilter.addEventListener("change", (event) => {
+  el.catalogCategoryFilter?.addEventListener("change", (event) => {
     state.categoryFilter = event.target.value;
     renderCatalog();
   });
 
-  el.stockSearch.addEventListener("input", (event) => {
+  el.stockSearch?.addEventListener("input", (event) => {
     state.stockSearch = event.target.value;
     renderStockTable();
   });
 
-  el.addLineBtn.addEventListener("click", () => {
+  el.addLineBtn?.addEventListener("click", () => {
     state.currentSaleLines.push(emptyLine());
     renderSaleLines();
     renderReceiptPreview();
   });
 
-  el.clearTicketBtn.addEventListener("click", () => {
+  el.clearTicketBtn?.addEventListener("click", () => {
     state.currentSaleLines = [emptyLine()];
     renderSaleLines();
     renderReceiptPreview();
   });
 
-  el.productForm.addEventListener("submit", (event) => {
+  el.productForm?.addEventListener("submit", (event) => {
     createProduct(event).catch((error) => {
       console.error(error);
       showToast(error.message || "Erreur produit.", "error");
     });
   });
 
-  el.saleForm.addEventListener("submit", (event) => {
+  el.saleForm?.addEventListener("submit", (event) => {
     createSale(event).catch((error) => {
       console.error(error);
       showToast(error.message || "Erreur vente.", "error");
@@ -696,15 +787,19 @@ function initEvents() {
   });
 
   document.addEventListener("click", (event) => {
-    const stockBtn = event.target.closest("[data-stock-adjust]");
+    const saveStockBtn = event.target.closest("[data-stock-save]");
     const deleteProductBtn = event.target.closest("[data-delete-product]");
     const deleteSaleBtn = event.target.closest("[data-delete-sale]");
 
-    if (stockBtn) {
-      adjustStock(stockBtn.dataset.stockAdjust, Number(stockBtn.dataset.stockDelta)).catch((error) => {
+    if (saveStockBtn) {
+      const productId = saveStockBtn.dataset.stockSave;
+      const input = document.querySelector(`[data-stock-input="${productId}"]`);
+
+      setStock(productId, input?.value || 0).catch((error) => {
         console.error(error);
         showToast("Erreur stock.", "error");
       });
+      return;
     }
 
     if (deleteProductBtn) {
@@ -713,6 +808,7 @@ function initEvents() {
         console.error(error);
         showToast("Erreur suppression produit.", "error");
       });
+      return;
     }
 
     if (deleteSaleBtn) {
@@ -724,7 +820,7 @@ function initEvents() {
     }
   });
 
-  el.quickSyncBtn.addEventListener("click", () => {
+  el.quickSyncBtn?.addEventListener("click", () => {
     renderAll();
     showToast(firebaseReady ? "Interface actualisée." : "Firebase pas encore configuré.");
   });
